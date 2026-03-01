@@ -458,6 +458,54 @@ function render_conditional_image_shortcode()
 add_shortcode('conditional_img', 'render_conditional_image_shortcode');
 
 /**
+ * Enqueue dropdown scripts/styles for the news page category filter.
+ */
+function news_category_dropdown_enqueue() {
+	$terms = get_terms( [
+		'taxonomy'   => 'category',
+		'hide_empty' => true,
+		'exclude'    => [ 1 ], // exclude Uncategorized
+	] );
+
+	if ( is_wp_error( $terms ) || empty( $terms ) ) {
+		return;
+	}
+
+	$terms_by_id = [];
+	foreach ( $terms as $term ) {
+		$terms_by_id[ $term->term_id ] = $term->slug;
+	}
+
+	$category_data = [];
+	foreach ( $terms as $term ) {
+		$category_data[ $term->slug ] = [
+			'id'          => $term->term_id,
+			'name'        => $term->name,
+			'parent'      => $term->parent,
+			'parent_slug' => $term->parent ? ( $terms_by_id[ $term->parent ] ?? '' ) : '',
+		];
+	}
+
+	wp_enqueue_script(
+		'news-category-dropdown',
+		get_template_directory_uri() . '/assets/js/news-category-dropdown.js',
+		[],
+		'5.1.0',
+		true
+	);
+
+	wp_localize_script( 'news-category-dropdown', 'newsCategoryData', $category_data );
+
+	wp_enqueue_style(
+		'news-category-dropdown',
+		get_template_directory_uri() . '/assets/css/news-category-dropdown.css',
+		[],
+		'5.1.0'
+	);
+}
+add_action( 'wp_enqueue_scripts', 'news_category_dropdown_enqueue' );
+
+/**
  * Exclude "Uncategorized" (ID 1) from the Elementor Taxonomy Filter widget.
  */
 add_filter( 'get_terms_args', function( $args, $taxonomies ) {
