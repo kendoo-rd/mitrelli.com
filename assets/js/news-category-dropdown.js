@@ -111,6 +111,22 @@
 			menu.className = 'e-filter-dropdown__menu';
 			wrapper.appendChild( menu );
 
+			// "View All" option — triggers the parent category filter
+			var viewAllBtn = document.createElement( 'button' );
+			viewAllBtn.className = 'e-filter-dropdown-child e-filter-dropdown-child--view-all';
+			viewAllBtn.setAttribute( 'data-filter', slug );
+			viewAllBtn.setAttribute( 'aria-pressed', 'false' );
+			viewAllBtn.textContent = 'View All';
+
+			viewAllBtn.addEventListener( 'click', function ( e ) {
+				e.stopPropagation();
+				resetFilterStore();
+				clearAllSelections();
+				btn.click();
+			} );
+
+			menu.appendChild( viewAllBtn );
+
 			childrenMap[ slug ].forEach( function ( child ) {
 				var childBtn = document.createElement( 'button' );
 				// NOT 'e-filter-item' — prevents Elementor from binding its own

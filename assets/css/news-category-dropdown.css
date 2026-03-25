@@ -102,3 +102,9 @@
 	color: #D35C27 !important;
 	font-weight: 600;
 }
+
+/* "View All" separator */
+.e-filter-dropdown-child--view-all {
+	border-bottom: 1px solid #e5e5e5 !important;
+	font-weight: 600;
+}
