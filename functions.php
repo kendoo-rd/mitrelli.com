@@ -544,6 +544,19 @@ function news_category_dropdown_enqueue() {
 add_action( 'wp_enqueue_scripts', 'news_category_dropdown_enqueue' );
 
 /**
+ * Footer brand lockup: the Taib Group mark beside the Mitrelli mark (KEN-30).
+ */
+function mitrelli_footer_brand_enqueue() {
+	wp_enqueue_style(
+		'mitrelli-footer-brand',
+		get_template_directory_uri() . '/assets/css/footer-brand.css',
+		[],
+		'1.0.0'
+	);
+}
+add_action( 'wp_enqueue_scripts', 'mitrelli_footer_brand_enqueue' );
+
+/**
  * Exclude "Uncategorized" (ID 1) from the Elementor Taxonomy Filter widget.
  */
 add_filter( 'get_terms_args', function( $args, $taxonomies ) {

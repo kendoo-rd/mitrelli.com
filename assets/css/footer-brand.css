@@ -1,0 +1,51 @@
+/**
+ * KEN-30 - Footer brand lockup (Version A).
+ *
+ * The Taib Group mark sits beside the Mitrelli mark at the right edge of the
+ * footer's bottom row, separated by a hairline rule, both on one baseline.
+ * The group mark reads as an endorsement of the company mark, which is why it
+ * leads and is set slightly wider.
+ *
+ * While the final artwork is outstanding, `.tg-logo-placeholder` stands in for
+ * it. Replacing the placeholder with the real image widget needs no CSS change.
+ */
+
+.footer-brand-lockup {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+	margin-left: auto; /* pushes the lockup to the right edge of the row */
+}
+
+/* Hairline between the two marks, drawn in the gap rather than inside either
+   one, so it reads as a separator and not as part of a logo. */
+.footer-brand-lockup > *:last-child {
+	border-left: 1px solid #d3d6da;
+	padding-left: 22px;
+}
+
+/* Placeholder only. Deliberately dashed so nobody mistakes it for artwork. */
+.footer-brand-lockup .tg-logo-placeholder {
+	font-size: 13px;
+	letter-spacing: 0.08em;
+	color: #8b9096;
+	border: 1px dashed #c2c6cb;
+	border-radius: 3px;
+	padding: 18px 30px;
+	white-space: nowrap;
+	line-height: 1;
+}
+
+/* Stack the lockup under the address block on narrow screens, keeping the
+   two marks side by side rather than breaking them apart. */
+@media (max-width: 767px) {
+	.footer-brand-lockup {
+		margin-left: 0;
+		margin-top: 18px;
+	}
+
+	.footer-brand-lockup .tg-logo-placeholder {
+		padding: 14px 22px;
+		font-size: 12px;
+	}
+}
