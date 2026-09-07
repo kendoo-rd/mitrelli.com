@@ -1,0 +1,85 @@
+/**
+ * KEN-30 - Footer brand lockup (Version A).
+ *
+ * The Taib Group mark sits beside the Mitrelli mark at the right edge of the
+ * footer's bottom row, separated by a hairline rule, both on one baseline.
+ * The group mark reads as an endorsement of the company mark, which is why it
+ * leads and is set slightly wider.
+ *
+ * While the final artwork is outstanding, `.tg-logo-placeholder` stands in for
+ * it. Replacing the placeholder with the real image widget needs no CSS change.
+ */
+
+/* Elementor writes its own per-element rules into a generated stylesheet that
+   loads after the theme, so a single-class selector here loses the cascade.
+   Doubling up on the container class raises specificity enough to win. */
+.e-con.footer-brand-lockup,
+.footer-brand-lockup {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+	margin-left: auto;         /* pushes the lockup across to the right */
+	justify-content: flex-end; /* and sits the marks on the right edge of it */
+
+	/* Elementor containers resolve justification through these custom
+	   properties, so the plain declarations above are not enough on their own. */
+	--justify-content: flex-end;
+	--align-items: center;
+}
+
+/**
+ * Footer gutter.
+ *
+ * The footer's right-hand edge sits 150px in: the legal links, the nav columns
+ * and the bottom row all end there. On the left, the social icons and the
+ * copyright line start at 150px, but the subscribe card's content started at
+ * 130px, so the left column did not line up with itself.
+ *
+ * Desktop only. The narrower breakpoints use their own spacing, set in
+ * Elementor, and should not inherit this.
+ */
+@media (min-width: 1025px) {
+	.subscribe-container > .e-con {
+		margin-left: 140px; /* 140 + the 10px container padding = 150 */
+	}
+
+	/* The copyright line sat 10px left of everything else, because its
+	   neighbours all sit inside containers carrying 10px of padding and it
+	   does not. Nudging it brings the whole left column onto 160px. */
+	.elementor-location-footer .elementor-element-e3b1ccc {
+		padding-left: 10px;
+	}
+}
+
+/* Hairline between the two marks, drawn in the gap rather than inside either
+   one, so it reads as a separator and not as part of a logo. */
+.footer-brand-lockup > *:last-child {
+	border-left: 1px solid #d3d6da;
+	padding-left: 22px;
+}
+
+/* Placeholder only. Deliberately dashed so nobody mistakes it for artwork. */
+.footer-brand-lockup .tg-logo-placeholder {
+	font-size: 13px;
+	letter-spacing: 0.08em;
+	color: #8b9096;
+	border: 1px dashed #c2c6cb;
+	border-radius: 3px;
+	padding: 18px 30px;
+	white-space: nowrap;
+	line-height: 1;
+}
+
+/* Stack the lockup under the address block on narrow screens, keeping the
+   two marks side by side rather than breaking them apart. */
+@media (max-width: 767px) {
+	.footer-brand-lockup {
+		margin-left: 0;
+		margin-top: 18px;
+	}
+
+	.footer-brand-lockup .tg-logo-placeholder {
+		padding: 14px 22px;
+		font-size: 12px;
+	}
+}
