@@ -59,10 +59,10 @@
    We use a CSS class (not aria-pressed) so Elementor's toggle logic is
    never affected: the parent can still be clicked normally.              */
 .e-filter-dropdown--active-child > .e-filter-item {
-	color: #D35C27 !important;
+	color: #B24D21 !important; /* #D35C27 was 3.94:1 on white; this is 5.28:1 */
 }
 .e-filter-dropdown--active-child .e-filter-dropdown__arrow::after {
-	color: #D35C27;
+	color: #B24D21;
 }
 
 /* ── Dropdown child items ────────────────────────────────────────────────
@@ -90,17 +90,27 @@
 	color: #3a3a3a !important;
 }
 
-/* Hover */
+/* Hover
+   The text stays dark and only the background tints. The brand orange
+   #D35C27 on the #fdf2ec tint measures 3.58:1, below the WCAG AA minimum
+   of 4.5:1 for normal text, so it is not used for hover text. */
 .e-filter-dropdown-child:hover {
 	background: #fdf2ec !important;
-	color: #D35C27 !important;
+	color: #3a3a3a !important;
 }
 
-/* Active / selected */
+/* Active / selected
+   Orange still marks the current selection, darkened to #B24D21 —
+   same hue, 4.80:1 on the tint and 5.28:1 on white. */
 .e-filter-dropdown-child[aria-pressed="true"] {
 	background: #fdf2ec !important;
-	color: #D35C27 !important;
+	color: #B24D21 !important;
 	font-weight: 600;
+}
+
+/* Selected item still needs to read as selected while hovered. */
+.e-filter-dropdown-child[aria-pressed="true"]:hover {
+	color: #B24D21 !important;
 }
 
 /* "View All" separator */

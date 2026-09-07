@@ -476,8 +476,46 @@ function news_category_dropdown_enqueue() {
 		$terms_by_id[ $term->term_id ] = $term->slug;
 	}
 
-	$category_data = [];
+	// Group children under their parent. get_terms() returns whatever order the
+	// terms-order plugin defines, which is manual and drifts as volumes are
+	// added; the dropdown must always read newest first.
+	$top_level = [];
+	$children  = [];
 	foreach ( $terms as $term ) {
+		if ( $term->parent ) {
+			$children[ $term->parent ][] = $term;
+		} else {
+			$top_level[] = $term;
+		}
+	}
+
+	// Newest first. Natural compare so "Vol 10" sorts above "Vol 9".
+	foreach ( $children as &$siblings ) {
+		usort( $siblings, function ( $a, $b ) {
+			return strnatcasecmp( $b->name, $a->name );
+		} );
+	}
+	unset( $siblings );
+
+	// Rebuild in display order: each top-level term followed by its children.
+	// The dropdown JS renders in this array's order, so it is the sort order.
+	$ordered = [];
+	foreach ( $top_level as $term ) {
+		$ordered[] = $term;
+		foreach ( $children[ $term->term_id ] ?? [] as $child ) {
+			$ordered[] = $child;
+		}
+		unset( $children[ $term->term_id ] );
+	}
+	// Any child whose parent was excluded or empty still needs to appear.
+	foreach ( $children as $orphans ) {
+		foreach ( $orphans as $orphan ) {
+			$ordered[] = $orphan;
+		}
+	}
+
+	$category_data = [];
+	foreach ( $ordered as $term ) {
 		$category_data[ $term->slug ] = [
 			'id'          => $term->term_id,
 			'name'        => $term->name,
@@ -490,7 +528,7 @@ function news_category_dropdown_enqueue() {
 		'news-category-dropdown',
 		get_template_directory_uri() . '/assets/js/news-category-dropdown.js',
 		[],
-		'5.1.0',
+		'5.2.0',
 		true
 	);
 
@@ -500,7 +538,7 @@ function news_category_dropdown_enqueue() {
 		'news-category-dropdown',
 		get_template_directory_uri() . '/assets/css/news-category-dropdown.css',
 		[],
-		'5.1.0'
+		'5.2.0'
 	);
 }
 add_action( 'wp_enqueue_scripts', 'news_category_dropdown_enqueue' );

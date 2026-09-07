@@ -64,10 +64,36 @@
 			var mod = window.elementorProFrontend &&
 			          elementorProFrontend.modules &&
 			          elementorProFrontend.modules.taxonomyFilter;
-			if ( mod && mod.loopWidgetsStore &&
-			     typeof mod.loopWidgetsStore.unsetFilter === 'function' &&
-			     selectedElementId && filterId ) {
-				mod.loopWidgetsStore.unsetFilter( selectedElementId, filterId );
+			if ( ! mod || ! mod.loopWidgetsStore || ! selectedElementId || ! filterId ) {
+				return;
+			}
+
+			var store = mod.loopWidgetsStore;
+			if ( typeof store.unsetFilter !== 'function' || typeof store.getWidget !== 'function' ) {
+				return;
+			}
+
+			/*
+			 * The widget is only registered in the store once a filter has been
+			 * applied at least once. Before that, getWidget() returns undefined
+			 * and unsetFilter() — which does
+			 *   delete this.getWidget( widgetId ).filters[ filterId ]
+			 * — throws "Cannot read properties of undefined (reading 'filters')".
+			 *
+			 * That exception used to escape this function and abort the calling
+			 * click handler before it ever triggered the filter, so the FIRST
+			 * dropdown selection after a page load silently did nothing.
+			 * Elementor guards the same call the same way (elements-handlers.js:599).
+			 */
+			var widget = store.getWidget( selectedElementId );
+			if ( ! widget || ! widget.filters ) {
+				return; // Nothing stored yet — nothing to reset.
+			}
+
+			try {
+				store.unsetFilter( selectedElementId, filterId );
+			} catch ( e ) {
+				// A stale filter term is recoverable; a dead click handler is not.
 			}
 		}
 
@@ -75,8 +101,20 @@
 		// and top-level buttons (needed when Elementor runs in multiple-selection
 		// mode, where activateFilterButton() skips its "reset all" step and
 		// leaves the previously active top-level button still marked).
+		//
+		// The hidden child buttons MUST be reset too. Elementor decides between
+		// select and deselect in onFilterButtonClick() by testing whether the
+		// clicked slug is already in getCurrentlyActiveFilter(), which is derived
+		// purely from [aria-pressed="true"]. With multiple_selection enabled,
+		// activateFilterButton() skips its "reset every button" branch, so a
+		// hidden button stays pressed after its first click — and the next click
+		// on that same volume is read as a deselect and clears the filter instead
+		// of applying it. Clearing them here makes every click an activate.
 		function clearAllSelections() {
 			filterEl.querySelectorAll( '.e-filter-item[data-filter]:not(.e-filter-item--hidden-child)' ).forEach( function ( b ) {
+				b.setAttribute( 'aria-pressed', 'false' );
+			} );
+			filterEl.querySelectorAll( '.e-filter-item--hidden-child' ).forEach( function ( b ) {
 				b.setAttribute( 'aria-pressed', 'false' );
 			} );
 			filterEl.querySelectorAll( '.e-filter-dropdown-child' ).forEach( function ( b ) {
@@ -141,11 +179,14 @@
 					var childSlug = this.getAttribute( 'data-filter' );
 
 					/*
-					 * Clear the store BEFORE clicking so that any previously
-					 * accumulated terms (from multi-select mode) are wiped out.
+					 * Clear the store AND every aria-pressed state BEFORE
+					 * clicking, so any previously accumulated terms (from
+					 * multi-select mode) are wiped out and Elementor reads the
+					 * click as a fresh selection rather than a toggle-off.
 					 * Elementor's handler then sets ONLY the child slug.
 					 */
 					resetFilterStore();
+					clearAllSelections();
 
 					var hiddenBtn = filterEl.querySelector(
 						'.e-filter-item--hidden-child[data-filter="' + childSlug + '"]'
@@ -168,8 +209,9 @@
 						);
 					}
 
-					// Visual state: clear all children, mark this one, mark parent
-					clearAllSelections();
+					// Visual state: mark this one and its parent. Elementor has
+					// just pressed the matching hidden button; that is left as-is
+					// and cleared on the next click.
 					this.setAttribute( 'aria-pressed', 'true' );
 					wrapper.classList.add( 'e-filter-dropdown--active-child' );
 				} );
